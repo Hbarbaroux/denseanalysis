@@ -55,7 +55,7 @@ end
 
 
 %% OPENING FUNCTION
-function DENSEanalysis_OpeningFcn(~, ~, handles, varargin)
+function handles = DENSEanalysis_OpeningFcn(~, ~, handles, varargin)
     if ~isappdata(handles.hfig,'GUIInitializationComplete')
         DENSEsetup;
         handles = initFcn(handles.hfig);
@@ -77,8 +77,8 @@ end
 
 %% OUTPUT FUNCTION
 % Outputs from this function are returned to the command line.
-function varargout = DENSEanalysis_OutputFcn(varargin)
-    varargout = {};
+function varargout = DENSEanalysis_OutputFcn(~, ~, handles)
+    varargout{1} = handles;
 end
 
 
@@ -133,14 +133,16 @@ function tool_save_ClickedCallback(~, ~, handles)
     saveFcn(handles,false);
 end
 
-function loadFcn(handles,type)
+function loadFcn(handles,type, startpath)
 
-    % proper startpath
-    switch type
-        case 'dicom'
-            startpath = get(handles.config, 'locations.dicomfolder', userdir());
-        otherwise,
-            startpath = get(handles.config, 'locations.matpath', userdir());
+    if nargin<3
+        % proper startpath
+        switch type
+            case 'dicom'
+                startpath = get(handles.config, 'locations.dicomfolder', userdir());
+            otherwise,
+                startpath = get(handles.config, 'locations.matpath', userdir());
+        end
     end
 
     % try to load new data
@@ -175,6 +177,7 @@ function loadFcn(handles,type)
     resetFcn(handles.hfig);
 
 end
+
 
 function windowkeypress(src, evnt)
     if ~isempty(evnt.Modifier)
@@ -288,6 +291,7 @@ function handles = initFcn(hfig)
 
     % gather guidata
     handles = guidata(hfig);
+    %guidata(hfig, handles);
 
     % Bind all keyboard events
     set(handles.hfig, 'WindowKeyPressFcn', @windowkeypress)
@@ -840,9 +844,19 @@ end
 
 
 %% MENU: EXPORT MAT/EXCEL/ROI
-function menu_exportmat_Callback(~, ~, handles)
+function menu_exportmat_Callback(~, ~, handles, custom_location, default_frame)
 
-    exportpath = get(handles.config, 'export.mat.location', '');
+    if exist('custom_location', 'var')
+        exportpath = custom_location;
+        preset_flag = 1;
+    else
+        exportpath = get(handles.config, 'export.mat.location', '');
+        preset_flag = 0;
+    end
+
+    if ~exist('default_frame', 'var')
+        default_frame = 1;
+    end
 
     h = getCurrentDataViewer(handles);
 
@@ -850,7 +864,7 @@ function menu_exportmat_Callback(~, ~, handles)
         return;
     end
 
-    file = h.exportMat(exportpath);
+    file = h.exportMat(exportpath, preset_flag, default_frame);
     if isempty(file)
         return;
     end
@@ -901,7 +915,7 @@ end
 
 
 %% MENU: RUN ANALYSIS
-function menu_runanalysis_Callback(~, ~, handles)
+function menu_runanalysis_Callback(~, ~, handles, didx, ridx, frame, varargin)
 
     % First check to make sure that we've already accepted the RUO
     % statement
@@ -914,10 +928,15 @@ function menu_runanalysis_Callback(~, ~, handles)
         handles.config.AcceptedRUO = accept;
     end
 
-    didx = handles.hdense.DENSEIndex;
-    ridx = handles.hdense.ROIIndex;
-    frame = handles.hdense.Frame;
-    spdata = handles.hdata.analysis(didx,ridx,frame);
+    if nargin<4
+        ridx = handles.hdense.ROIIndex;
+        frame = handles.hdense.Frame;
+        didx = handles.hdense.DENSEIndex;
+    elseif ~exist('didx', 'var')
+        didx = 0;
+    end
+
+    spdata = handles.hdata.analysis(didx,ridx,frame,varargin{:});
     if isempty(spdata), return; end
     handles.hsidebar.ActiveTab = 3;
 end

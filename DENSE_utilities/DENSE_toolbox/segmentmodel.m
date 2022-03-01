@@ -23,7 +23,8 @@ function options = segmentmodel(varargin)
         'Nmodel',               [],...
         'Nseg',                 [],...
         'MaxSegments',          132,...
-        'PositionIndices',      []);
+        'PositionIndices',      [],...
+        'DefaultFrame',         1);
 
     api = parseinputs(defargs,[],varargin{:});
 
@@ -658,6 +659,7 @@ function options = mainFcn(api)
     api.hplaybar = playbar(api.hppanel);
     api.hplaybar.Min = api.FramesForAnalysis(1);
     api.hplaybar.Max = api.FramesForAnalysis(2);
+    api.hplaybar.Value = api.DefaultFrame;
     hlisten_playbar = addlistener(api.hplaybar,...
         'NewValue',@(varargin)playbackFcn(api.hfig));
 

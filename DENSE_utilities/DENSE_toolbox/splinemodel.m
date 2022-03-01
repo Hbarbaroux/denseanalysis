@@ -194,17 +194,35 @@ function options = splinemodel(varargin)
 
     % default seeds, ensuring "empty" seeds still have dimension
     % (this makes updating the graphics object easier)
+    nbr_seeds = 4;
+    nbr_mask_pts = size(api.pts, 1);
+    seed_pts_indices = uint16(linspace( ...
+        1-(nbr_mask_pts/(nbr_seeds+2)/2), ...
+        nbr_mask_pts+(nbr_mask_pts/(nbr_seeds+2)/2), ...
+        nbr_seeds+2));
+    seed_pts_indices = seed_pts_indices(2:end-1);
+
+    angles = atan2((mean(api.pts(:,2)) - api.pts(:,2)), ...
+                   (mean(api.pts(:,1)) - api.pts(:,1)));
+    [~,angles_sort]=sort(angles);
+    api_pts_angle_sorted = api.pts(angles_sort,:);
     if isempty(xseed)
         api.Xseed = zeros(0,2);
-        if ~isempty(api.Xpha), api.Xseed = api.pts(1,[2 1]); end
+        if ~isempty(api.Xpha)
+            api.Xseed = api_pts_angle_sorted(seed_pts_indices,[2 1]); 
+        end
     end
     if isempty(yseed)
         api.Yseed = zeros(0,2);
-        if ~isempty(api.Ypha), api.Yseed = api.pts(1,[2 1]); end
+        if ~isempty(api.Ypha)
+            api.Yseed = api_pts_angle_sorted(seed_pts_indices,[2 1]); 
+        end
     end
     if isempty(zseed)
         api.Zseed = zeros(0,2);
-        if ~isempty(api.Zpha), api.Zseed = api.pts(1,[2 1]); end
+        if ~isempty(api.Zpha)
+            api.Zseed = api_pts_angle_sorted(seed_pts_indices,[2 1]); 
+        end
     end
 
 

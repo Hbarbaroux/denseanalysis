@@ -75,12 +75,12 @@ classdef AnalysisViewer < DataViewer
             obj.Enable = val;
         end
 
-        function file = exportExcel(obj,startpath)
-            file = exportExcelFcn(obj,startpath);
+        function file = exportExcel(obj,preset_flag)
+            file = exportExcelFcn(obj,preset_flag);
         end
 
-        function file = exportMat(obj,startpath)
-            file = exportMatFcn(obj,startpath);
+        function file = exportMat(obj,startpath,preset_flag,default_frame)
+            file = exportMatFcn(obj,startpath,preset_flag,default_frame);
         end
 
         function strainoptions(obj)
@@ -1531,11 +1531,17 @@ end
 %% EXPORT MAT FILE
 % MAT file contains images and recovered displacement data, with some
 % information on the image source and analysis options
-function [file, out] = exportMatFcn(obj,startpath)
+function [file, out] = exportMatFcn(obj,startpath,preset_flag,default_frame)
 
     % check for startpath
     if nargin < 2 || isempty(startpath)
         startpath = pwd;
+    end
+    
+    if nargin < 3 || preset_flag == 0
+        preset_flag = 0;
+    else
+        preset_flag = 1;
     end
 
     if ~exist(startpath, 'dir')
@@ -1591,7 +1597,7 @@ function [file, out] = exportMatFcn(obj,startpath)
 
     % determine strain object
     if isempty(obj.straindata)
-        spl2strainFcn(obj);
+        spl2strainFcn(obj, default_frame);
         if isempty(obj.straindata)
             file = [];
             return;
@@ -2266,7 +2272,7 @@ function strainoptsFcn(obj)
     obj.Enable = val;
 end
 
-function spl2strainFcn(obj)
+function spl2strainFcn(obj,spl2strainFcn)
 
     % waitbar
     hwait = waitbartimer;
@@ -2294,7 +2300,8 @@ function spl2strainFcn(obj)
         'MaskFcn',          obj.hdata.spl.MaskFcn,...
         'spldx',            obj.hdata.spl.spldx,...
         'spldy',            obj.hdata.spl.spldy,...
-        'spldz',            obj.hdata.spl.spldx);
+        'spldz',            obj.hdata.spl.spldx, ...
+        'DefaultFrame',     spl2strainFcn);
 
     if any(strcmpi(type,{'SA','LA'}))
         api.Mag  = obj.hdata.spl.Mag;

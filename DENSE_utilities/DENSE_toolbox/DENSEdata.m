@@ -626,6 +626,10 @@ end
 %% ANALYSIS FUNCTION
 function spdata = analysisFcn(obj,didx,ridx,seedframe,varargin)
 
+    if didx == 0
+        didx = ((obj.roi(ridx).SeqIndex(1)-1) / 3) + 1;
+    end
+
     % gather data
     imdata = imagedata(obj,didx);
     cndata = contourData(obj,ridx);
@@ -811,9 +815,9 @@ function imdata = ImageData(obj,didx,checkonlyflag)
             end
         end
 
-        % ensure imagery is double floating point
-        % normalize magnitude imagery per frame onto the range [0 1]
-        % normalize phase imagery onto the range [-pi pi]
+        % ensure imagery is double floating point normalize magnitude
+        % imagery per frame onto the range [0 1] normalize phase imagery
+        % onto the range [-pi pi]
         mxpha = 2^12 - 1;
 
         for k = 1:3
@@ -831,8 +835,8 @@ function imdata = ImageData(obj,didx,checkonlyflag)
             end
         end
 
-        % determine multi-type, indicating we should apply swap x/y,
-        % and negate phase information if necessary
+        % determine multi-type, indicating we should apply swap x/y, and
+        % negate phase information if necessary
 
         % swap imagery & associated parameters
         if dns.SwapFlag
@@ -848,8 +852,8 @@ function imdata = ImageData(obj,didx,checkonlyflag)
             end
         end
 
-        % gather magnitude information
-        % (average of normalized magnitude frames)
+        % gather magnitude information (average of normalized magnitude
+        % frames)
         Mag = 0;
         for k = 1:3
            if ~isempty(I{1,k})%~isnan(midx(k))
@@ -872,6 +876,10 @@ function imdata = ImageData(obj,didx,checkonlyflag)
         'EncFreq',      dns.EncFreq,...
         'Scale',        dns.Scale);
 end
+
+% function imdata = ImageData(obj,didx,checkonlyflag)
+% 
+% end
 
 function cndata = contourData(obj,ridx,frames,checkonlyflag)
     if nargin < 4 || isempty(checkonlyflag)
