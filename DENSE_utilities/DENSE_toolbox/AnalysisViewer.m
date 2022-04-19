@@ -2272,7 +2272,7 @@ function strainoptsFcn(obj)
     obj.Enable = val;
 end
 
-function spl2strainFcn(obj,spl2strainFcn)
+function spl2strainFcn(obj,default_frame)
 
     % waitbar
     hwait = waitbartimer;
@@ -2300,8 +2300,11 @@ function spl2strainFcn(obj,spl2strainFcn)
         'MaskFcn',          obj.hdata.spl.MaskFcn,...
         'spldx',            obj.hdata.spl.spldx,...
         'spldy',            obj.hdata.spl.spldy,...
-        'spldz',            obj.hdata.spl.spldx, ...
-        'DefaultFrame',     spl2strainFcn);
+        'spldz',            obj.hdata.spl.spldx);
+
+    if nargin == 2
+        api.DefaultFrame = default_frame;
+    end
 
     if any(strcmpi(type,{'SA','LA'}))
         api.Mag  = obj.hdata.spl.Mag;
