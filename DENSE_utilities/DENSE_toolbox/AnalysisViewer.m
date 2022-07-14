@@ -75,8 +75,8 @@ classdef AnalysisViewer < DataViewer
             obj.Enable = val;
         end
 
-        function file = exportExcel(obj,preset_flag)
-            file = exportExcelFcn(obj,preset_flag);
+        function file = exportExcel(obj,startpath,preset_flag,default_frame)
+            file = exportExcelFcn(obj,startpath,preset_flag,default_frame);
         end
 
         function file = exportMat(obj,startpath,preset_flag,default_frame)
@@ -1885,11 +1885,17 @@ end
 
 %% EXPORT EXCEL DOCUMENT
 
-function file = exportExcelFcn(obj,startpath)
+function file = exportExcelFcn(obj,startpath,preset_flag,default_frame)
 
     % check for startpath
-    if nargin < 2 || isempty(startpath) || ~exist(startpath,'dir')
+    if nargin < 2 || isempty(startpath)
         startpath = pwd;
+    end
+    
+    if nargin < 3 || preset_flag == 0
+        preset_flag = 0;
+    else
+        preset_flag = 1;
     end
 
     % search for Excel?
@@ -1929,31 +1935,45 @@ function file = exportExcelFcn(obj,startpath)
     end
 
     % determine file name
-    startfile = fullfile(startpath,['untitled',filter{1,1}]);
-    [uifile,uipath,filteridx] = uiputfile(filter(:,2:3),[],startfile);
-    if isequal(uifile,0)
-        file = [];
-        return;
+    if ~exist(startpath, 'dir')
+        [origstartpath,~,ext] = fileparts(startpath);
+        file = startpath;
+        startpath = origstartpath;
+        if isempty(ext)
+            % If there is no extension then MATLAB save will add
+            % '.mat'. This will allow us to return the correct
+            % filename to the user.
+            file = [file '.xls'];
+        end
     end
 
-    % save extension
-    ext = filter{filteridx,1};
-
-    % ensure proper extension
-    file = fullfile(uipath,uifile);
-    [~,~,e] = fileparts(file);
-    if ~isequal(e,ext), file = [file, ext]; end
-
-    % check for excel
-    if ~strcmpi(ext,'.xls')
-        delete(excelCleanupObj);
-        flag_excel = false;
-        drawnow
+    if ~exist('file', 'var')
+        startfile = fullfile(startpath,['untitled',filter{1,1}]);
+        [uifile,uipath,filteridx] = uiputfile(filter(:,2:3),[],startfile);
+        if isequal(uifile,0)
+            file = [];
+            return;
+        end
+    
+        % save extension
+        ext = filter{filteridx,1};
+    
+        % ensure proper extension
+        file = fullfile(uipath,uifile);
+        [~,~,e] = fileparts(file);
+        if ~isequal(e,ext), file = [file, ext]; end
+    
+        % check for excel
+        if ~strcmpi(ext,'.xls')
+            delete(excelCleanupObj);
+            flag_excel = false;
+            drawnow
+        end
     end
 
     % determine strain object
     if isempty(obj.straindata)
-        spl2strainFcn(obj);
+        spl2strainFcn(obj, default_frame);
         if isempty(obj.straindata)
             file = [];
             return;

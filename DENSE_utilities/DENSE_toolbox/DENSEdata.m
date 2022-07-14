@@ -627,9 +627,20 @@ end
 function spdata = analysisFcn(obj,didx,ridx,seedframe,varargin)
 
     if didx == 0
-        didx = ((obj.roi(ridx).SeqIndex(1)-1) / 3) + 1;
+        if (any(strcmp(fields(obj.roi),'CorrectedSeqIndex'))) && (~isempty(obj.roi(ridx).CorrectedSeqIndex) > 0)
+            didx = obj.roi(ridx).CorrectedSeqIndex(1);
+        else
+            didx = obj.roi(ridx).SeqIndex(1);
+        end
     end
 
+    for i = 1:length(obj.dns)
+        if obj.dns(i).MagIndex(1) == didx
+            didx = i;
+            break
+        end
+    end
+    
     % gather data
     imdata = imagedata(obj,didx);
     cndata = contourData(obj,ridx);

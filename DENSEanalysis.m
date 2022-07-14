@@ -872,9 +872,15 @@ function menu_exportmat_Callback(~, ~, handles, custom_location, default_frame)
     handles.config.export.mat.location = fileparts(file);
 end
 
-function menu_exportexcel_Callback(~, ~, handles)
+function menu_exportexcel_Callback(~, ~, handles, custom_location, default_frame)
 
-    exportpath = get(handles.config, 'export.excel.location', '');
+    if exist('custom_location', 'var')
+        exportpath = custom_location;
+        preset_flag = 1;
+    else
+        exportpath = get(handles.config, 'export.excel.location', '');
+        preset_flag = 0;
+    end
 
     h = getCurrentDataViewer(handles);
 
@@ -882,7 +888,7 @@ function menu_exportexcel_Callback(~, ~, handles)
         return;
     end
 
-    file = h.exportExcel(exportpath);
+    file = h.exportExcel(exportpath, preset_flag, default_frame);
     if isempty(file), return; end
 
     handles.config.export.excel.location = fileparts(file);
