@@ -632,12 +632,12 @@ function spdata = analysisFcn(obj,didx,ridx,seedframe,varargin)
         else
             didx = obj.roi(ridx).SeqIndex(1);
         end
-    end
 
-    for i = 1:length(obj.dns)
-        if obj.dns(i).MagIndex(1) == didx
-            didx = i;
-            break
+        for i = 1:length(obj.dns)
+            if obj.dns(i).MagIndex(1) == didx
+                didx = i;
+                break
+            end
         end
     end
     

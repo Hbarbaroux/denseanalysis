@@ -402,8 +402,15 @@ function fv = spl2patchLA(api)
     % the full combined contour
     [x,y,i] = intersections(...
         Cclose(:,1),Cclose(:,2),xspoke(:),yspoke(:));
+
     [i,idx] = sort(i);
     x = x(idx); y = y(idx);
+
+    if length(x) == 14
+        x = x([1:1:9 12:1:end]);
+        y = y([1:1:9 12:1:end]);
+        i = i([1:1:9 12:1:end]);
+    end
 
     % contour+intersections
     node = [x(:) y(:); C];
